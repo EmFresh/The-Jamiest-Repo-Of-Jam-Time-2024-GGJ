@@ -12,6 +12,6 @@ public class ScreenScroll : MonoBehaviour
 	void Update()
 	{
 		var render = GetComponent<Renderer>();
-		render.material.mainTextureOffset = new Vector2(transform.position.x * scale, 0);
+		render.material.mainTextureOffset = new Vector2(Time.time*scale, 0);
 	}
 }
