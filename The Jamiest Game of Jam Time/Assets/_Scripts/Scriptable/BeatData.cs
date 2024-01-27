@@ -25,8 +25,12 @@ public enum HitType
 	TEST1,
 	TEST2,
 	TEST3,
-	TEST4,
-	IMAGE,
+	TEST4, 
+
+	PLATFORM1,
+	PLATFORM2,
+	PLATFORM3,
+
 }
 
 [Serializable]
