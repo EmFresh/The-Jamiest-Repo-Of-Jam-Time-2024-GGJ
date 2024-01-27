@@ -14,6 +14,7 @@ using UnityEngine.Events;
 using Unity.VisualScripting.FullSerializer;
 using System.Reflection;
 
+[RequireComponent(typeof(Rigidbody))]
 public class Movement : MonoBehaviour
 {
 	public float jumpForce = 5;
@@ -30,35 +31,40 @@ public class Movement : MonoBehaviour
 	{
 		if(!ctx.performed) return;
 
-		var val = ctx.action.ReadValue<float>();
+		var val = transform.up * ctx.action.ReadValue<float>() * jumpForce;
+
+		var body = GetComponent<Rigidbody>();
+		var collider = GetComponent<Collider>(); 
+		if(Physics.Raycast(transform.position, -transform.up, collider.bounds.extents.y + 0.5f) && body.velocity.y <= 0)
+			body.AddForce(val, ForceMode.Impulse);
 
 	}
 
 	public void Move(CallbackContext ctx)
 	{
-		var val = ctx.action.ReadValue<Vector2>();
+		var val = ctx.action.ReadValue<Vector2>() * movementSpeed * Time.deltaTime;
 		val *= (ctx.performed || ctx.started) ? 1 : 0;
 
-		print("Name: " + this.GetHashCode() + nameof(this.Move));
 
 		this.RepeatingCoroutine(nameof(Move), () =>
 		{
-			transform.position += new Vector3(val.x, 0, val.y) * movementSpeed * Time.deltaTime;
+			transform.position += new Vector3(val.x, 0, val.y);
 		});
 	}
 
 }
+
 public static class My_Util
 {
 
 	static Dictionary<MonoBehaviour, Dictionary<string, UnityAction>> moves = new Dictionary<MonoBehaviour, Dictionary<string, UnityAction>>();
 	static Dictionary<MonoBehaviour, Coroutine> movesCo = new Dictionary<MonoBehaviour, Coroutine>();
-	public static void RepeatingCoroutine(this MonoBehaviour src, string funcName, in UnityAction enumu)
+	public static void RepeatingCoroutine(this MonoBehaviour src, string UIDName, in UnityAction enumu)
 	{
 		if(moves.ContainsKey(src))
-			moves[src] = moves[src].AddNReturnCollection(new KeyValuePair<string, UnityAction>(src.GetHashCode() + funcName, enumu));
+			moves[src][src.GetHashCode() + UIDName] = enumu;
 		else
-			moves[src] = new Dictionary<string, UnityAction>(new[] { new KeyValuePair<string, UnityAction>(src.GetHashCode() + funcName, enumu) });
+			moves[src] = new Dictionary<string, UnityAction>(new[] { new KeyValuePair<string, UnityAction>(src.GetHashCode() + UIDName, enumu) });
 
 		IEnumerator Repeat(ICollection<UnityAction> enu)
 		{
