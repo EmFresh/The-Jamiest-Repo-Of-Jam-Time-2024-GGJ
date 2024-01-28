@@ -105,7 +105,12 @@ public class RhythmObjActions : MonoBehaviour
 	{
 		IEnumerator Repeat()
 		{
+			yield return new WaitWhile(() =>
+			{
 
+
+				return true;
+			}); 
 		}
 		yield break;
 	}
@@ -147,7 +152,7 @@ public class RhythmObjActions : MonoBehaviour
 	{
 		//if(timer == DateTime.MinValue)
 		//	timer = DateTime.Now;
-
+		print($"Clip Time: {clip.time}");
 		NoteUpdate();
 	}
 }

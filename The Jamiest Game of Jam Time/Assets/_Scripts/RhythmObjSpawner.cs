@@ -9,17 +9,9 @@ public class RhythmObjSpawner : MonoBehaviour
 {
 	public SongTrack track;
 	public Transform parentObj;
-	//public ChangeBGImage bg;
-	public List<Texture2D> textrues;
 	public float reactTime = 2.1f;
+	public float speed = 1.0f;
 
-	//[HideInInspector]
-	//public WorldControl mapMover;
-
-	private void Awake()
-	{
-	//	mapMover = FindFirstObjectByType<WorldControl>();
-	}
 
 	int last = 0, texNum = 0;
 	bool init = true;
@@ -30,10 +22,10 @@ public class RhythmObjSpawner : MonoBehaviour
 
 		if(init)
 		{
-			track.beats.Sort((a, b) => { return a?.spawnTimeOffset.CompareTo(b?.spawnTimeOffset) ?? 1; });
+			track.beats.Sort((a, b) => { return a?.noteData.hitTimings[0].CompareTo(b?.noteData.hitTimings[0]) ?? 1; });
 			foreach(var beat in track.beats)
-				if((beat?.spawnTimeOffset ?? float.PositiveInfinity) != float.PositiveInfinity)
-					timings.Add(new Tuple<float, NoteData>(beat.spawnTimeOffset, beat.noteData));
+				if((beat?.noteData.hitTimings[0] ?? float.PositiveInfinity) != float.PositiveInfinity)
+					timings.Add(new Tuple<float, NoteData>(beat.noteData.hitTimings[0], beat.noteData));
 
 			init = false;
 		}
@@ -42,16 +34,14 @@ public class RhythmObjSpawner : MonoBehaviour
 		{
 			GameObject obj = null;
 			obj = Instantiate(track.enemyPrefabs[index], parentObj);
-			// obj.transform.localPosition = new(-1.15f + 1.15f * index, 0, -mapMover.transform.position.z/*start location*/ + reactTime*(mapMover.speed));
-			obj.transform.localRotation *= Quaternion.Euler(0, 180, 0);
+			obj.transform.localPosition = transform.position;
+			obj.transform.localRotation *= Quaternion.Euler(0, 0, 0);
 			return obj;
 		}
 
 		for(int count = last; count < timings.Count; ++count)
 		{
 			var time = timings[count];
-
-			//if((time?.Item2 ?? null) == null) continue;
 
 			if(clip.time/*replacing song time*/ - time.Item1 >= reactTime) // top bound for enemy
 				break;
@@ -64,46 +54,55 @@ public class RhythmObjSpawner : MonoBehaviour
 				//var obj = Instantiate(track.enemyPrefabs[0], new Vector3(0, 0, time.Item1), Quaternion.Euler(0, 180, 0), parentObj);
 
 				GameObject obj = null;
-				var notespace = parentObj.transform.GetChild(0).GetComponent<Collider>().bounds.extents.x / 2;
+				//var notespace = parentObj.transform.GetChild(0).GetComponent<Collider>().bounds.extents.x / 2;
 
-				switch(time.Item2.hitTypes[0])
+				switch((int)time.Item2.hitTypes[0] )
 				{
-				case HitType.TEST1:
+				case (int)HitType.TEST1:
 					obj = createEnemy(0);
 					break;
-				case HitType.TEST2:
+				case (int)HitType.TEST2:
 					obj = createEnemy(1);
 					break;
-				case HitType.TEST3:
+				case (int)HitType.TEST3:
 					obj = createEnemy(2);
+					break;
+				case (int)HitType.TEST4:
+					obj = createEnemy(3);
 					break;
 					//	case HitType.TEST4:
 					//		obj = createEnemy(1);
 					//		break;
 				}
-				if(obj == null) continue;
+
+				if(obj == null)
+				{
+					last = count + 1; 
+					continue;
+				}
 				//	obj.transform.localPosition -= (Vector3)(Vector2)obj.GetComponentInChildren<MeshFilter>().mesh.bounds.min;
 
-				var act = obj.AddComponent<RhythmObjActions>();
-				act.noteData = time.Item2;
-				act.reactTime = reactTime;
-				act.hitModel = track.notePrefabs[0];
-				act.clip = clip;
+			//	var act = obj.AddComponent<RhythmObjActions>();
+				var mov = obj.AddComponent<RhythmObjMovement>();
+
+
+				mov.dir = -obj.transform.right;
+				mov.speed = speed;
+
+				//act.noteData = time.Item2;
+				//act.reactTime = reactTime;
+				//act.hitModel = track.notePrefabs[0];
+				//act.clip = clip;
 
 				last = count + 1;
 			}
 		}
 	}
 
-	//DateTime timer = DateTime.MinValue;
 	public AudioSource clip = null;
 	void Update()
 	{
-		//if(!clip?.isPlaying ?? false)
-		//	clip?.Play();
 
-		//	var tmp = track.tempo.GetBeatMeasure(clip.time);
-		//	print(tmp);
 
 		SpawnUpdate();
 	}

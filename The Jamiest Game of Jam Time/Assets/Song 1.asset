@@ -261,6 +261,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b0406f34e53eb084383bcfbcb43f1270, type: 2}
   - {fileID: 11400000, guid: f46b6594f5fa18d42a68529931548c9a, type: 2}
   - {fileID: 11400000, guid: 29e977a76e227bb46bb4ebdae147383e, type: 2}
-  - {fileID: 11400000, guid: 545bb61776ca9c94ab5f89b834557399, type: 2}
-  - {fileID: 11400000, guid: c1968dea419b44943a280db8da9b5735, type: 2}
   tempo: {fileID: 11400000, guid: eb5a5400e94c1a843988a3e6b284d32a, type: 2}
