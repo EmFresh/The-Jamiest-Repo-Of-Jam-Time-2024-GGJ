@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
+using UnityEngine.InputSystem.Utilities;
 using UnityEngine.TextCore.Text;
 
 public class RhythmObjSpawner : MonoBehaviour
@@ -12,8 +13,11 @@ public class RhythmObjSpawner : MonoBehaviour
 	public Transform parentObj;
 	public float reactTime = 2.1f;
 	public float speed = 1.0f;
+	 
+	public List<AudioClip> clips = new List<AudioClip>();
 
-	int last = 0, texNum = 0;
+
+	int last = 0;
 	bool init = true;
 	List<Tuple<float, NoteData>> timings = new List<Tuple<float, NoteData>>();
 
@@ -25,7 +29,7 @@ public class RhythmObjSpawner : MonoBehaviour
 		{
 			track.beats.Sort((a, b) => { return a?.noteData.hitTimings[0].CompareTo(b?.noteData.hitTimings[0]) ?? 1; });
 			foreach(var beat in track.beats)
-				if((beat?.noteData.hitTimings[0] ?? float.PositiveInfinity) != float.PositiveInfinity)
+				if(beat?.noteData.hitTimings[0] != 0 && (beat?.noteData.hitTimings[0] ?? float.PositiveInfinity) != float.PositiveInfinity)
 					timings.Add(new Tuple<float, NoteData>(beat.noteData.hitTimings[0], beat.noteData));
 
 			init = false;
@@ -33,14 +37,17 @@ public class RhythmObjSpawner : MonoBehaviour
 
 		GameObject createEnemy(int index)
 		{
-			var casts = Physics.RaycastAll(transform.position + new Vector3(-5, 0, 0), -transform.up);
+			//Find floor location
+			var casts = Physics.RaycastAll(transform.position + new Vector3(-3, 0, 0), -transform.up);
 			var point = transform.position;
-			foreach(var cast in casts.Reverse())
+			foreach(var cast in casts)
 				point = cast.point;
 
+			//create object
 			GameObject obj = null;
 			obj = Instantiate(track.enemyPrefabs[index], parentObj);
-			obj.transform.localPosition = point + new Vector3(0, obj.GetComponent<Collider>().bounds.extents.y, 0);
+			var box = obj.GetComponent<Collider>().bounds;
+			obj.transform.localPosition = point + box.center + new Vector3(0, obj.GetComponent<Collider>().bounds.extents.y, 0);
 			obj.transform.localRotation = Quaternion.Euler(0, 0, 0);
 
 			return obj;
@@ -49,33 +56,49 @@ public class RhythmObjSpawner : MonoBehaviour
 
 		GameObject createPlatform(int index)
 		{
-			var casts = Physics.RaycastAll(transform.position + new Vector3(-5, 0, 0), -transform.up);
-			foreach(var cast in casts)
-				if(cast.transform.GetComponent<RhythmObjMovement>())
-					return createEnemy(index);
+			//find floor
+			var casts = Physics.RaycastAll(transform.position + new Vector3(-3, 0, 0), -transform.up);
+			//foreach(var cast in casts)
+			//	if(cast.transform.GetComponent<RhythmObjMovement>())
+			//		return createEnemy(index);
 
+			//Get location
 			var point = transform.position;
 			foreach(var cast in casts.Reverse())
 				point = cast.point;
 
+
+			//Place in one of 3 heights
+
+			var height = transform.position.y * (1.0f / 3);
+			//print($"height: {height}");
+
+
+			System.Random ran = new System.Random();
+
 			GameObject obj = null;
 			obj = Instantiate(track.enemyPrefabs[index], parentObj);
-			obj.transform.localPosition = point;
+			var box = obj.GetComponent<Collider>().bounds;
+
+			obj.transform.localPosition = point - box.center + new Vector3(0, height * ran.Next(1, 3), 0);
 			obj.transform.localRotation = Quaternion.Euler(0, 0, 0);
+
+
 
 			return obj;
 		}
 
-
+		//print(last);
 		for(int count = last; count < timings.Count; ++count)
 		{
 			var time = timings[count];
 
+			//print(clip.time - time.Item1);
 			if(clip.time/*replacing song time*/ - time.Item1 >= reactTime) // top bound for enemy
-				break;
+				continue;
 
 
-			if(clip.time/*replacing song time*/ - time.Item1 >= -.05) // within bound
+			if(clip.time/*replacing song time*/ - time.Item1 >= -.1) // within bound
 			{
 				GameObject obj = null;
 
@@ -93,6 +116,12 @@ public class RhythmObjSpawner : MonoBehaviour
 				case (int)HitType.TEST4:
 					obj = createEnemy(3);
 					break;
+				case (int)HitType.PLATFORM1:
+					obj = createPlatform(4);
+					break;
+				case (int)HitType.PLATFORM2:
+					obj = createPlatform(5);
+					break;
 				}
 
 				if(obj == null)
@@ -101,12 +130,16 @@ public class RhythmObjSpawner : MonoBehaviour
 					continue;
 				}
 
+				 
+
 				var mov = obj.AddComponent<RhythmObjMovement>();
 				mov.dir = -obj.transform.right;
 				mov.speed = speed;
-
-
+				
 				last = count + 1;
+
+				System.Random rand = new System.Random();
+				clip.PlayOneShot(clips[rand.Next(clips.Count)]);
 			}
 		}
 	}

@@ -50,7 +50,7 @@
                 {
                     "name": "modifier",
                     "id": "b8c16bab-74de-4123-b34b-bb6d77235ca9",
-                    "path": "<Keyboard>/ctrl",
+                    "path": "<Keyboard>/shift",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
