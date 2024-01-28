@@ -63,10 +63,11 @@ public class CreateSong : MonoBehaviour
 		var notes = track.beats;
 		foreach(var tmp in notes)
 		{
+		//	Application.dataPath;
 			string path = $"Assets/_audio/song 2/Note{num++}.asset";
-			while(File.Exists( path))
+			while(File.Exists(path))
 				path = $"Assets/_audio/song 2/Note{num++}.asset";
-			
+
 			AssetDatabase.CreateAsset(tmp, path);//uncomment wen creating later 
 		}
 #endif

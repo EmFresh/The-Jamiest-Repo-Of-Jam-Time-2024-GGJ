@@ -7,15 +7,16 @@ public class RhythmObjMovement : MonoBehaviour
 {
 	public float speed = 1;
 	public Vector3 dir = new Vector3();
+	public ScoreSystem score;
+
 	// Update is called once per frame
 	void Update()
 	{
 		transform.position += dir.normalized * speed * Time.deltaTime;
 	}
 
-	private void OnTriggerEnter(Collider other)
+	private void OnDestroy()
 	{
-		if(other.gameObject.GetComponent<RhythmObjMovement>())
-			Destroy(gameObject);
+		score.DecreaseScore(60);
 	}
 }

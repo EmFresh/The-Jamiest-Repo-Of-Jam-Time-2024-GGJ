@@ -7,12 +7,15 @@ using UnityEngine;
 using UnityEngine.InputSystem.Utilities;
 using UnityEngine.TextCore.Text;
 
+
+
 public class RhythmObjSpawner : MonoBehaviour
 {
 	public SongTrack track;
 	public Transform parentObj;
 	public float reactTime = 2.1f;
 	public float speed = 1.0f;
+	public ScoreSystem scoreSystem;
 	 
 	public List<AudioClip> clips = new List<AudioClip>();
 
@@ -135,19 +138,26 @@ public class RhythmObjSpawner : MonoBehaviour
 				var mov = obj.AddComponent<RhythmObjMovement>();
 				mov.dir = -obj.transform.right;
 				mov.speed = speed;
+				mov.score = scoreSystem;
 				
 				last = count + 1;
 
 				System.Random rand = new System.Random();
-				clip.PlayOneShot(clips[rand.Next(clips.Count)]);
+				//clip.PlayOneShot(clips[rand.Next(clips.Count)]);
 			}
 		}
 	}
 
 	public AudioSource clip = null;
-
+	float lastTime=0; 
 	void Update()
 	{
+		if(clip.time>lastTime)
+		{
+			scoreSystem.IncreaseScore((clip.time-lastTime)*50);
+			lastTime = clip.time;
+		}
+
 		SpawnUpdate();
 	}
 }
