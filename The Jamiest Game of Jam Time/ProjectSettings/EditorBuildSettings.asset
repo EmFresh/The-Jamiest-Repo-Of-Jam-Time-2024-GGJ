@@ -4,5 +4,14 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/_Scenes/Title.unity
+    guid: a5b7fad1f86f9af4da19505d4d30152e
+  - enabled: 1
+    path: Assets/_Scenes/The Jamiest Scene Of Jam Time 1.unity
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/_Scenes/The Jamiest Scene Of Jam Time 2.unity
+    guid: 5c48dc3beaa30104ba4a5a3488dac485
   m_configObjects: {}
